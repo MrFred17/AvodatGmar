@@ -20,7 +20,7 @@ class Game:
         pygame.display.update()
 
     def select_piece(self, row, col):
-        if not self.board.is_game_over and self.started_puzzle:
+        if not self.board.is_game_over and self.started_puzzle and not self.board.is_draw_offer_visible and not self.board.is_draw:
             # selection based on mouse click position
             if self.selected:  # if we selected SOMETHING
                 result = self.make_move(row, col)  # let's try to move it to pressed [row, col]
@@ -90,8 +90,6 @@ class Game:
                                    (col * SQUARE_SIZE + SQUARE_MIDDLE, row * SQUARE_SIZE + SQUARE_MIDDLE), 15)
 
     def reset_game(self, ai_depth, user_id):
-        self.board.is_win_msg_visible = False
-        self.board.is_game_over = False
         self.new_board()
         if user_id:
             self.stats = GameStats(ai_depth, user_id)

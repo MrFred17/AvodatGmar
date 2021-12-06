@@ -8,9 +8,7 @@ mydb = mysql.connector.connect(
 )
 
 mycursor = mydb.cursor()
-
-mycursor.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'games';")
-print(mycursor.fetchall())
+# print(mycursor.fetchall())
 
 # mycursor.execute("CREATE TABLE users (ID INTEGER PRIMARY KEY AUTO_INCREMENT, username TEXT, password TEXT);")
 

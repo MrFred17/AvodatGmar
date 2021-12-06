@@ -118,6 +118,9 @@ def start_game(with_ai=False, ai_depth=2, user_id=None):
     if user_id:
         count_stats = True
 
+    moves = 0
+    draw_accepted, draw_offered, viewing_board = False, False, False
+
     while run:
         clock.tick(FPS)
 
@@ -135,6 +138,7 @@ def start_game(with_ai=False, ai_depth=2, user_id=None):
             search_object = SearchTree(ai_depth, WHITE)
             ai_move = search_object.find_optimal_move(game.board)
             game.ai_move(ai_move)
+            moves += 2
 
         for event in pygame.event.get():
 
@@ -142,13 +146,38 @@ def start_game(with_ai=False, ai_depth=2, user_id=None):
             if event.type == pygame.QUIT:
                 run = False
 
-            # arrow stuff
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT_CLICK:
+                # print(pygame.mouse.get_pos())
                 arrow = False
                 arrows_info = []
                 position = pygame.mouse.get_pos()
                 row, col = get_mouse_row_col(position)
                 game.select_piece(row, col)
+
+                # for draw offer
+                if game.board.is_draw_offer_visible:
+                    # accept
+                    if is_mouse_on_button(205, 370, 100, 70):
+                        draw_accepted = True
+                        game.board.is_draw = True
+                        game.board.is_draw_offer_visible = False
+                        game.board.toggle_game_over_msg()
+
+                    # decline
+                    if is_mouse_on_button(495, 370, 100, 70):
+                        game.board.toggle_draw_offer()
+
+                    # view board
+                    if is_mouse_on_button(350, 420, 105, 40):
+                        viewing_board = True
+                        game.board.toggle_draw_offer()
+                        game.board.is_draw = True
+
+                # while viewing board, user clicks "back"
+                if viewing_board and is_mouse_on_button(37, 227, 125, 40):
+                    viewing_board = False
+                    game.board.is_draw = False
+                    game.board.toggle_draw_offer()
 
                 # user clicked on "quit game" icon
                 if is_mouse_on_button(0, 0, 30, 30) and not game.board.is_error_msg_visible and not game_finished:
@@ -164,11 +193,15 @@ def start_game(with_ai=False, ai_depth=2, user_id=None):
 
                 # after the game is over, play again or back to main menu?
                 if game.board.is_win_msg_visible:
+                    moves = 0
                     game_finished = True
                     # play again:
                     if is_mouse_on_button(169, 467, 178, 47):
                         game.reset_game(ai_depth, user_id)
                         game_finished = False
+                        draw_offered, draw_accepted = False, False
+                        toggled = False
+                        game.board.is_draw_offer_visible = False
                     # back to main menu:
                     if is_mouse_on_button(450, 468, 178, 47):
                         main_menu(user_id)
@@ -188,12 +221,21 @@ def start_game(with_ai=False, ai_depth=2, user_id=None):
                     this_arrow = draw_arrow(start, end, start_square)
                     arrows_info.append(this_arrow)
 
+        # draw offer
+        red, white = game.board.red_left, game.board.white_left
+        red_qu, white_qu = game.board.red_queens, game.board.white_queens
+        if moves > 130 or ((red == red_qu and white == white_qu) and (abs(red_qu - white_qu < 2))):
+            if not draw_accepted and not draw_offered:
+                game.board.is_draw_offer_visible = True
+                draw_offered = True
+
         winner = game.board.check_win()
         if winner:
             if not game_finished and count_stats:
                 game.stats.end_timer()
                 game.stats.assign_winner(winner)
-                game.stats.insert_stats_to_database()
+                if not draw_accepted:
+                    game.stats.insert_stats_to_database()
             if not toggled:
                 game.board.toggle_game_over_msg()
                 toggled = True

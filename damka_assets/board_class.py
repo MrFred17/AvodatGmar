@@ -10,20 +10,25 @@ class Board:
 
     def __init__(self):
         self.board = []
-        # keep track of pieces:
-        self.red_left = self.white_left = 12
-        self.red_queens = self.white_queens = 0
+        # keep track of pieces
+        self.red_left, self.white_left = 12, 12
+        self.red_queens, self.white_queens = 0, 0
         # create the Board
         self.create_pieces()
         self.is_error_msg_visible = False
         self.is_win_msg_visible = False
         self.is_game_over = False
+        self.is_draw_offer_visible = False
+        self.is_draw = False
 
     def toggle_error_visibility(self):
         self.is_error_msg_visible = not self.is_error_msg_visible
 
     def toggle_game_over_msg(self):
         self.is_win_msg_visible = not self.is_win_msg_visible
+
+    def toggle_draw_offer(self):
+        self.is_draw_offer_visible = not self.is_draw_offer_visible
 
     def create_pieces(self):
         # placing the pieces on the board
@@ -78,11 +83,11 @@ class Board:
     def show_quit_msg(self):
         pygame.draw.rect(WIN, BLACK, ((100, 200), (600, 300)))
         large_font = pygame.font.SysFont('Arial', 50)
-        small_font = pygame.font.SysFont('Arial', 40)
+        medium_font = pygame.font.SysFont('Arial', 40)
 
         msg = large_font.render('Are you sure you want to quit?', True, HAKI)
-        yes = small_font.render('Yes', True, RED)
-        no = small_font.render('No', True, RED)
+        yes = medium_font.render('Yes', True, RED)
+        no = medium_font.render('No', True, RED)
 
         pygame.draw.rect(WIN, WHITE, ((205, 370), (100, 70)))  # yes
         pygame.draw.rect(WIN, WHITE, ((495, 370), (100, 70)))  # no
@@ -90,6 +95,26 @@ class Board:
         WIN.blit(msg, (125, 250))
         WIN.blit(yes, (225, 380))
         WIN.blit(no, (525, 380))
+
+    def show_draw_offer(self):
+        pygame.draw.rect(WIN, BLACK, ((100, 200), (600, 300)))
+        large_font = pygame.font.SysFont('Arial', 40)
+        medium_font = pygame.font.SysFont('Arial', 30)
+        smaller_font = pygame.font.SysFont('Arial', 20)
+
+        msg = large_font.render('The Computer Has Offered a Draw.', True, HAKI)
+        yes = medium_font.render('Accept', True, RED)
+        no = medium_font.render('Decline', True, RED)
+        view_board = smaller_font.render('View Board', True, BLACK)
+
+        pygame.draw.rect(WIN, WHITE, ((205, 370), (100, 70)))  # yes
+        pygame.draw.rect(WIN, WHITE, ((495, 370), (100, 70)))  # no
+        pygame.draw.rect(WIN, WHITE, ((350, 420), (105, 40)))  # view board
+
+        WIN.blit(msg, (143, 250))
+        WIN.blit(yes, (215, 380))
+        WIN.blit(no, (502, 380))
+        WIN.blit(view_board, (360, 430))
 
     def draw_squares(self, window):
         # drawing the squares
@@ -226,7 +251,6 @@ class Board:
                     piece.draw(window)
 
         # the quit button
-
         window.blit(quit_button, (0, 0))
         if self.is_error_msg_visible:
             self.show_quit_msg()
@@ -235,8 +259,12 @@ class Board:
         if self.is_win_msg_visible:
             window.blit(game_over_img, (0, 218))
 
-        # back show
-        if not self.is_win_msg_visible and self.check_win():
+        # draw offer
+        if self.is_draw_offer_visible:
+            self.show_draw_offer()
+
+        # back (after game over & viewing board)
+        if not self.is_win_msg_visible and (self.check_win() or self.is_draw):
             window.blit(back_show_img, (5, 225))
 
         # arrows
