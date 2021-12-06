@@ -1,3 +1,5 @@
+import pygame
+
 import SQL
 from damka_assets.game_class import *
 from AI import *
@@ -1093,4 +1095,7 @@ def log_in_first_puzzles():
         clock.tick(60)
 
 
-main_menu()
+try:
+    main_menu()
+except pygame.error:
+    pass
