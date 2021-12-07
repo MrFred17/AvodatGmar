@@ -1,5 +1,4 @@
 import pygame
-
 import SQL
 from damka_assets.game_class import *
 from AI import *
