@@ -224,12 +224,13 @@ def start_game(with_ai=False, ai_depth=2, user_id=None):
                     arrows_info.append(this_arrow)
 
         # draw offer
-        red, white = game.board.red_left, game.board.white_left
-        red_qu, white_qu = game.board.red_queens, game.board.white_queens
-        if moves > 130 or ((red == red_qu and white == white_qu) and (abs(red_qu - white_qu < 2))):
-            if not draw_accepted and not draw_offered:
-                game.board.is_draw_offer_visible = True
-                draw_offered = True
+        if with_ai:
+            red, white = game.board.red_left, game.board.white_left
+            red_qu, white_qu = game.board.red_queens, game.board.white_queens
+            if moves > 130 or ((red == red_qu and white == white_qu) and (abs(red_qu - white_qu < 2)) and (moves > 90)):
+                if not draw_accepted and not draw_offered:
+                    game.board.is_draw_offer_visible = True
+                    draw_offered = True
 
         winner = game.board.check_win()
         if winner:
